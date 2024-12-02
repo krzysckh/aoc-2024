@@ -15,7 +15,7 @@ sub okp {
   return 0 unless @$_~~ [sort {$a <=> $b} @$_] or @$_~~ [sort {$b <=> $a} @$_];
 
   for (my $i = 1; $i < @$_; ++$i) {
-    return 0 if not abs($_->[$i-1]-$_->[$i]) ~~ [1..3]
+    return 0 if not abs $_->[$i-1] - $_->[$i] ~~ [1..3]
   }
 
   return 1
@@ -35,7 +35,7 @@ sub p2 {
     } else {
       for (my $i = 0; $i < @$_+1; ++$i) {
         my @temp = @$a;
-        splice(@temp, $i, 1);
+        splice @temp, $i, 1;
         if (okp \@temp) {
           ++$res;
           next a;
