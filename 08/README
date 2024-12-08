@@ -1,3 +1,5 @@
+install libgd-perl, ffmpeg and gifsicle to create an animation.
+
 $ perl 8.pl
 p1: 369
 p2: 1169
