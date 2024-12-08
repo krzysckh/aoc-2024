@@ -9,8 +9,6 @@ use List::MoreUtils ':all';
 use Class::Struct;
 use autobox;
 
-sub ARRAY::has { any {$_ eq $_[1]} @{$_[0]} }
-
 struct Node => {
   x => '$',
   y => '$',
@@ -18,7 +16,7 @@ struct Node => {
 
 my @l = map {chomp; [split '']} read_file 'input';
 my %nodes; # hash of T -> Node
-my ($mx, $my) = (scalar @l, scalar @{$l[0]});
+my ($vx, $vy) = ([0..scalar @l-1], [0..scalar @{$l[0]}-1]); # xs and ys on map
 
 for my $y (0..@l-1) {
   $_ = $l[$y];
@@ -27,6 +25,9 @@ for my $y (0..@l-1) {
       unless $_->[$x] eq '.'
   }
 }
+
+sub ARRAY::has   { any {$_ eq $_[1]} @{$_[0]} }
+sub ARRAY::onmap { $vx->has($_[0]->[0]) and $vy->has($_[0]->[1]) }
 
 sub p1 {
   my %antinodes; # hash of X -> Y -> n
@@ -41,13 +42,13 @@ sub p1 {
         my ($x1, $y1) = ($x - $dx, $y - $dy);
         my ($x2, $y2) = ($_->x + $dx, $_->y + $dy);
 
-        $antinodes{$x1}->{$y1}++ if [0..$mx-1]->has($x1) and [0..$my-1]->has($y1);
-        $antinodes{$x2}->{$y2}++ if [0..$mx-1]->has($x2) and [0..$my-1]->has($y2);
+        $antinodes{$x1}->{$y1}++ if [$x1, $y1]->onmap;
+        $antinodes{$x2}->{$y2}++ if [$x2, $y2]->onmap;
       }
     }
   }
 
-  say "p1: " . reduce { $a + scalar keys %$b } 0, values %antinodes;
+  say "p1: " . reduce { $a + keys %$b } 0, values %antinodes;
 }
 
 sub p2 {
@@ -64,20 +65,20 @@ sub p2 {
         $antinodes{$_->x}->{$_->y}++;
         for (my $i = 1; ; ++$i) {
           my ($nx, $ny) = ($x - $dx*$i, $y - $dy*$i);
-          last unless [0..$mx-1]->has($nx) and [0..$my-1]->has($ny);
+          last unless [$nx, $ny]->onmap;
           $antinodes{$nx}->{$ny}++;
         }
 
         for (my $i = 1; ; ++$i) {
           my ($nx, $ny) = ($_->x + $dx*$i, $_->y + $dy*$i);
-          last unless [0..$mx-1]->has($nx) and [0..$my-1]->has($ny);
+          last unless [$nx, $ny]->onmap;
           $antinodes{$nx}->{$ny}++;
         }
       }
     }
   }
 
-  say "p2: " . reduce { $a + scalar keys %$b } 0, values %antinodes;
+  say "p2: " . reduce { $a + keys %$b } 0, values %antinodes;
 }
 
 p1;
