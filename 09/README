@@ -1,0 +1,5 @@
+warning: slow (not really sure why)
+
+$ perl 9.pl
+p1: 6346871685398
+p2: 6373055193464
