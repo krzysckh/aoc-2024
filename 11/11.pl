@@ -3,35 +3,31 @@ use warnings;
 
 use Modern::Perl '2023';
 use File::Slurp;
-use Data::Printer;
-use List::MoreUtils ':all';
-
-no warnings;
 
 my @s = split /\s+/, read_file 'input';
 
-sub blink ($) {
-  my ($sum, %l);                              # l: hash of value -> count
+sub blink {
+  my ($sum, %l); # l: hash of value -> count
   $l{$_}++ for @s;
 
-  for (1..$_[0]) {                            # perlcritic can suck my left nut
-    my %diff;
+  for (1..$_[0]) {
+    my %apply;
     for my $v (keys %l) {
-      if ($v eq '0') {
-        $diff{'1'} += $l{$v};
-        $diff{$v} -= $l{$v};
+      if ($v == 0) {
+        $apply{1} += $l{$v};
+        $apply{$v} -= $l{$v};
       } elsif (length($v) % 2 == 0) {
         my $len = length $v;
-        $diff{0+substr $v, $len/2} += $l{$v}; # +0 to delete prefixing zeros
-        $diff{substr $v, 0, $len/2} += $l{$v};
-        $diff{$v} -= $l{$v};
+        $apply{0+substr $v, $len/2} += $l{$v}; # +0 to delete prefixing zeros
+        $apply{substr $v, 0, $len/2} += $l{$v};
+        $apply{$v} -= $l{$v};
       } else {
-        $diff{$v*2024} += $l{$v};
-        $diff{$v} -= $l{$v};
+        $apply{$v*2024} += $l{$v};
+        $apply{$v} -= $l{$v};
       }
     }
 
-    for my ($k, $v) (%diff) {
+    while (my ($k, $v) = each %apply) {
       $l{$k} += $v;
     }
   }
@@ -41,11 +37,11 @@ sub blink ($) {
 }
 
 sub p1 {
-  say "p1: " . blink 25
+  say "p1: ", blink 25
 }
 
 sub p2 {
-  say "p2: " . blink 75
+  say "p2: ", blink 75
 }
 
 p1;
