@@ -6,10 +6,9 @@ use File::Slurp;
 use Data::Printer;
 use List::MoreUtils ':all';
 use List::Util qw(reduce min max);
+use Class::Struct;
 
 no warnings 'recursion';
-
-use Class::Struct;
 
 struct Plot => {
   T         => '$', # type
@@ -28,7 +27,7 @@ for (my $y = 0; not eof $f; ++$y) {
   chomp;
   my @c = split '';
   for (0..@c-1) {
-    $map{$y}->{$_} = Plot->new(T => $c[$_], pts => []);
+    $map{$y}->{$_} = Plot->new(T => $c[$_], pts => [], area => 1, perimeter => 0);
   }
 }
 
@@ -39,9 +38,7 @@ sub flood {
   my ($x, $y) = @_;
 
   my $p = $map{$y}->{$x};
-  $p->area(1);
   $p->flag(1);
-  $p->perimeter(0);
   push @{$p->pts}, [$x, $y];
 
   if ($x - 1 >= 0 and $map{$y}->{$x-1}->T eq $p->T) {
@@ -89,7 +86,6 @@ sub flood {
   }
 }
 
-our @dir = ([1, 0], [0, 1], [-1, 0], [0, -1]);
 sub sidesof {
   my ($sides, %m) = (0);
   my %ptsof; # hash of DIR -> Y -> X -> bool
