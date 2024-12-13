@@ -1,12 +1,8 @@
 use strict;
 use warnings;
 
-use Modern::Perl;
+use Modern::Perl '2023';
 use File::Slurp;
-use Data::Printer;
-use List::MoreUtils ':all';
-use List::Util qw(min max);
-use POSIX qw(ceil floor);
 use Class::Struct;
 use autobox;
 
@@ -18,9 +14,9 @@ struct Pt => {
 };
 
 struct Machine => {
-  A     => 'Pt',
-  B     => 'Pt',
-  prize => 'Pt'
+  A => 'Pt', # button A
+  B => 'Pt', # button B
+  P => 'Pt'  # point of the Prize
 };
 
 my @machs;
@@ -33,36 +29,30 @@ for (split '\n\n', read_file 'input') {
   $_[1] =~ /Button .: X\+(\d+), Y\+(\d+)/;
   $b = Pt->new(x => $1, y => $2);
   $_[2] =~ /Prize: X=(\d+), Y=(\d+)/;
-  push @machs, Machine->new(A => $a, B => $b, prize => Pt->new(x => $1, y => $2));
+  push @machs, Machine->new(A => $a, B => $b, P => Pt->new(x => $1, y => $2));
 }
 
-sub calc {
+sub solve {
   my (@bs) = @_;
   my $sum = 0;
   for (@bs) {
-    my ($A, $B) = ($_->A, $_->B);
-    my ($xa, $ya, $xb, $yb, $x, $y) = ($A->x, $A->y, $B->x, $B->y, $_->prize->x, $_->prize->y);
+    my ($xa, $ya, $xb, $yb, $x, $y) = ($_->A->x, $_->A->y, $_->B->x, $_->B->y, $_->P->x, $_->P->y);
     my $n = (($xb*$y)-($yb*$x))/(($xb*$ya)-($yb*$xa));
     my $m = ($x-($n*$xa))/$xb;
 
-    if ($n->integerp and $m->integerp) {
-      $sum += $n*3+$m;
-    }
+    $sum += $n*3+$m if $n->integerp and $m->integerp;
   }
 
   $sum
 }
 
 sub p1 {
-  say "p1: ", calc @machs;
+  say "p1: ", solve @machs;
 }
 
 sub p2 {
-  say "p2: ", calc map {Machine->new(A => $_->A,
-                                     B => $_->B,
-                                     prize => Pt->new(
-                                       x => $_->prize->x + $amnt,
-                                       y => $_->prize->y + $amnt))} @machs;
+  say "p2: ", solve map {Machine->new(A => $_->A, B => $_->B, P => Pt->new(x => $_->P->x + $amnt,
+                                                                           y => $_->P->y + $amnt))} @machs;
 }
 
 p1;
