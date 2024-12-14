@@ -1,0 +1,9 @@
+$ perl 14.pl
+p1: 222208000
+generating out.gif...
+$ mkdir o
+$ gifsicle --explode -o o/o < out.gif
+$ pcmanfm o
+# look for an image with a christmas tree
+# the answer is the number of the image file + 1
+# 7623 in this case
