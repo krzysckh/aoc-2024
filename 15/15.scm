@@ -1,5 +1,3 @@
-(define in ((string->regex "c/\n\n/") (list->string (file->list "input"))))
-
 (define (move->list m)
   (case m
     (#\> '(1  . 0))
@@ -7,14 +5,21 @@
     (#\^ '(0  . -1))
     (#\v '(0  . 1))))
 
+(define (hasv? l v)
+  (any (C equal? v) l))
+
+;;--- get input
+
+(define in ((string->regex "c/\n\n/") (list->string (file->list "input"))))
 (define moves (map move->list (string->list (fold string-append "" ((string->regex "c/\n/") (cadr in))))))
 
 (define Map
   (map
-   (λ (s) (map (λ (c) (case c
-                        (#\. '_)
-                        (else => (λ (_) (string->symbol (string c))))))
-               (string->list s)))
+   (λ (s) (map
+           (λ (c) (case c
+                    (#\. '_)
+                    (else => (λ (_) (string->symbol (string c))))))
+           (string->list s)))
    ((string->regex "c/\n/") (car in))))
 
 (define (findn thing l)
@@ -25,7 +30,7 @@
      (else
       (walk (cdr l) (+ acc 1))))))
 
-;;--- part 2
+;;--- solve part 2
 
 (define-values (px py)
   (let loop ((m Map) (y 0))
@@ -69,7 +74,7 @@
    #n
    (iota 0 1 (len Map2))))
 
-;; ((y x) ...)
+;; ((y . x) ...)
 (define walls
   (fold
    (λ (a b)
@@ -77,9 +82,6 @@
        (append a (zip cons (make-list (len l) b) l))))
    #n
    (iota 0 1 (len Map2))))
-
-(define (hasv? l v)
-  (any (C equal? v) l))
 
 (define (block-of x y blocks)
   (let ((b (car (filter (λ (b) (has? (cdr b) x)) (filter (λ (v) (equal? (car v) y)) blocks)))))
@@ -102,13 +104,14 @@
              (_blocks blocks)
              (blocks-without (filter (λ (b) (not (equal? b (list y x1 x2)))) blocks))
              (ok1? _1 _2 blocks (maybe-move x1 y m blocks-without))
-             (ok2? _1 _2 blocks (maybe-move x2 y m blocks)))
+             (ok2? _1 _2 blocks (maybe-move x2 y m blocks))) ; test if both blocks can be pushed
         (if (and ok1? ok2?)
             (values #t x y (append blocks (list (list (+ y (cdr m)) (+ x1 (car m)) (+ x2 (car m))))))
             (values #f px py _blocks))))
-     (else ;; touching nothing
+     (else
       (values #t x y blocks)))))
 
+;; final block positions
 (define fin
   (let loop ((x px) (y py) (moves moves) (blocks blocks))
     (if (null? moves)
