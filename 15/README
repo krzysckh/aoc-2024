@@ -1,0 +1,6 @@
+yeah this is awkward
+
+$ perl 15.pl
+p1: 1577255
+$ ol 15.scm
+p2: 1597035
