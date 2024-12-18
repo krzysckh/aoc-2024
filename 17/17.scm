@@ -66,6 +66,6 @@
                        (res (call/cc (λ (f) (vm code A B C f)))))
                   (when (equal? res (ncdr code (- (len code) 0 i 1)))
                     (if-lets ((r (loop (+ i 1) A)))
-                             (c A))))) ; fucked up
+                      (c A))))) ; fucked up
               (iota 0 1 8))
              #f)))))))
