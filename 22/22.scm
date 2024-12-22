@@ -1,5 +1,15 @@
 (import
- (owl metric))
+ (prefix (owl sys) sys/))
+
+(define (main p1 banana-map)
+  (format stdout "p1: ~a~%" p1)
+  (format stdout "p2: ~a~%" (ff-fold (λ (o k v) (if (> v o) v o)) 0 banana-map))
+  (halt 0))
+
+;; me when i cheat :3
+(when (sys/file? "state.fasl")
+  (let* ((l (fasl-load "state.fasl" 'bad)))
+    (main (car l) (cadr l))))
 
 (define in
   (force-ll (lmap string->number (lines (open-input-file "input")))))
@@ -12,10 +22,18 @@
          (rs (prune (bxor (floor (/ rs 32)) rs))))
     (prune (bxor (* rs 2048) rs))))
 
-(define (nth-rand rs n)
-  (if (= n 1)
-      (rand* rs)
-      (nth-rand (rand* rs) (- n 1))))
+(define (p1)
+  (let loop ((sum 0))
+    (lets ((who msg (next-mail)))
+      (tuple-case msg
+        ((add! x)
+         (print "add " x)
+         (loop (+ sum x)))
+        ((get)
+         (mail who sum)
+         (loop sum))))))
+
+(thread 'p1 (p1))
 
 ;; ff's test for equality with eq?, so a key has to be an interned symbol
 (define (fuck x)
@@ -29,7 +47,9 @@
          (cdr in)
          (let walk ((rs (car in)) (n 0) (ff ff) (log `((,(modulo (car in) 10) . #f))) (skip empty))
            (if (= n 2000)
-               ff
+               (begin
+                 (mail 'p1 (tuple 'add! rs))
+                 ff)
                (let* ((rs (rand* rs))
                       (b (modulo rs 10))
                       (v (- b (car (last log 'oops))))
@@ -42,9 +62,6 @@
                               ff)))
                  (walk rs (+ n 1) ff log (put skip k #f)))))))))
 
-(format stdout "p1: ~a~%" (sum (map (lambda (x) (nth-rand x 2000)) in)))
-(format stdout "p2: ~a~%"
- (ff-fold
-  (λ (o k v) (if (> v o) v o))
-  0
-  banana-map))
+(let ((l (list (interact 'p1 (tuple 'get)) banana-map)))
+  (fasl-save l "state.fasl")
+  (main (car l) (cadr l)))

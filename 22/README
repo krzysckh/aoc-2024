@@ -1,3 +1,6 @@
+rm ./state.fasl after updating ./input
+yes i'm cheating with the execution speed
+
 $ ol 22.scm
 p1: 14726157693
 p2: 1614
